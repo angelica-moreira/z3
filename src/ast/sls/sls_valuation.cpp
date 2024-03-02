@@ -74,6 +74,15 @@ namespace bv {
         return out;
     }
 
+    rational bvect::get_value(unsigned nw) const {
+        rational p(1), r(0);
+        for (unsigned i = 0; i < nw; ++i) {
+            r += p * rational((*this)[i]);
+            p *= rational::power_of_two(8 * sizeof(digit_t));
+        }
+        return r;
+    }
+
     sls_valuation::sls_valuation(unsigned bw) {
         set_bw(bw);
         m_lo.set_bw(bw);
@@ -398,15 +407,6 @@ namespace bv {
         clear_overflow_bits(bits);
     }
 
-    rational sls_valuation::get_value(bvect const& bits) const {
-        rational p(1), r(0);
-        for (unsigned i = 0; i < nw; ++i) {
-            r += p * rational(bits[i]);
-            p *= rational::power_of_two(8 * sizeof(digit_t));
-        }
-        return r;
-    }
-
     void sls_valuation::get(bvect& dst) const {
         m_bits.copy_to(nw, dst);
     }
@@ -479,8 +479,8 @@ namespace bv {
             set_value(m_hi, h);
         }
         else {            
-            auto old_lo = get_value(m_lo);
-            auto old_hi = get_value(m_hi);
+            auto old_lo = lo();
+            auto old_hi = hi();
             if (old_lo < old_hi) {
                 if (old_lo < l && l < old_hi)
                     set_value(m_lo, l),
