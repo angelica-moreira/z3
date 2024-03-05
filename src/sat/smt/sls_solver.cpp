@@ -99,13 +99,9 @@ namespace sls {
             m_bvsls->assert_expr(tr(fml.get()));
         }
 
-        // use phase assignment from literals?
-        std::function<bool(expr*, unsigned)> eval = [&](expr* e, unsigned r) {
-            return false;
-        };
+
 
         m_bvsls->init();
-        m_bvsls->init_eval(eval);
         m_bvsls->updt_params(s().params());
 
         m_thread = std::thread([this]() { run_local_search(); });        
@@ -122,7 +118,11 @@ namespace sls {
     }
 
     void solver::run_local_search() {
-        lbool r = (*m_bvsls)();
+        // use phase assignment from literals?
+        std::function<bool(expr*, unsigned)> eval = [&](expr* e, unsigned r) {
+            return false;
+            };
+        lbool r = (*m_bvsls)(eval, 0, nullptr);
         m_result = r;
         m_completed = true;
     }

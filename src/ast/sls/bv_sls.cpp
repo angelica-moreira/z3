@@ -29,33 +29,43 @@ namespace bv {
         m(m), 
         bv(m),
         m_terms(m),
-        m_eval(m)
+        m_eval(m, m_terms)
     {}
 
     void sls::init() {
         m_terms.init(); 
     }
 
-    void sls::init_eval(std::function<bool(expr*, unsigned)>& eval) {
-        m_eval.init_eval(m_terms.assertions(), eval);
-        m_eval.tighten_range(m_terms.assertions());
-        init_repair();
+    void sls::init_eval(std::function<bool(expr*, unsigned)>& eval, unsigned n, expr* const* asms) {
+        m_eval.init_eval(eval);
+        m_eval.tighten_range();
+        init_repair(n, asms);
+        m_assertion_set.reset();
+        for (unsigned i = 0; i < n; ++i)
+            m_assertion_set.insert(asms[i]->get_id());
+        for (auto* e : m_terms.assertions())
+            m_assertion_set.insert(e->get_id());
     }
 
-    void sls::init_repair() {
+    void sls::init_repair(unsigned n, expr* const* asms) {
         m_repair_down = UINT_MAX;
         m_repair_up.reset();
         m_repair_roots.reset();
-        for (auto* e : m_terms.assertions()) {
+        auto init_root = [&](expr* e) {
             if (!m_eval.bval0(e)) {
                 m_eval.set(e, true);
                 m_repair_roots.insert(e->get_id());
-            }
-        }
-        for (auto* t : m_terms.terms()) {
+            }            
+        };
+
+        for (auto* e : m_terms.assertions())
+            init_root(e);
+        for (unsigned i = 0; i < n; ++i)
+            init_root(asms[i]);
+
+        for (auto* t : m_terms.terms()) 
             if (t && !re_eval_is_correct(t)) 
-                m_repair_roots.insert(t->get_id());            
-        }
+                m_repair_roots.insert(t->get_id());                    
     }
 
     void sls::init_repair_goal(app* t) {
@@ -67,7 +77,7 @@ namespace bv {
         }
     }
 
-    void sls::reinit_eval() {
+    void sls::reinit_eval(unsigned n, expr* const* asms) {
         std::function<bool(expr*, unsigned)> eval = [&](expr* e, unsigned i) {
             auto should_keep = [&]() {
                 return m_rand() % 100 <= 92;
@@ -83,8 +93,8 @@ namespace bv {
             }
             return m_rand() % 2 == 0;
         };
-        m_eval.init_eval(m_terms.assertions(), eval);
-        init_repair();
+        m_eval.init_eval(eval);
+        init_repair(n, asms);
     }
 
     std::pair<bool, app*> sls::next_to_repair() {
@@ -141,16 +151,17 @@ namespace bv {
     }
 
 
-    lbool sls::operator()() {
+    lbool sls::operator()(std::function<bool(expr*, unsigned)>& eval, unsigned n, expr* const* asms) {
         lbool res = l_undef;
         m_stats.reset();
-        m_stats.m_restarts = 0;
+        m_stats.m_restarts = 0; 
+        init_eval(eval, n, asms);
         do {
             res = search();
             if (res != l_undef)
                 break;
             trace();
-            reinit_eval();
+            reinit_eval(n, asms);
         } 
         while (m.inc() && m_stats.m_restarts++ < m_config.m_max_restarts);
 
@@ -225,7 +236,7 @@ namespace bv {
 
     model_ref sls::get_model() {
         model_ref mdl = alloc(model, m);
-        auto& terms = m_eval.sort_assertions(m_terms.assertions());
+        auto& terms = m_terms.sorted_terms();
         for (expr* e : terms) {
             if (!re_eval_is_correct(to_app(e))) {
                 verbose_stream() << "missed evaluation #" << e->get_id() << " " << mk_bounded_pp(e, m) << "\n";
@@ -246,12 +257,11 @@ namespace bv {
                 mdl->register_decl(f, bv.mk_numeral(n, v.bw));
             }
         }
-        terms.reset();
         return mdl;
     }
 
     std::ostream& sls::display(std::ostream& out) { 
-        auto& terms = m_eval.sort_assertions(m_terms.assertions());
+        auto& terms = m_terms.sorted_terms();
         for (expr* e : terms) {
             out << e->get_id() << ": " << mk_bounded_pp(e, m, 1) << " ";
             if (m_eval.is_fixed0(e))
@@ -266,7 +276,6 @@ namespace bv {
                 out << (m_eval.bval0(e)?"T":"F");
             out << "\n";
         }
-        terms.reset();
         return out; 
     }
 

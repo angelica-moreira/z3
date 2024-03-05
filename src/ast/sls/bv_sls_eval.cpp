@@ -17,15 +17,16 @@ Author:
 
 namespace bv {
 
-    sls_eval::sls_eval(ast_manager& m): 
+    sls_eval::sls_eval(ast_manager& m, sls_terms& terms): 
         m(m), 
         bv(m),
-        m_fix(*this)
+        m_fix(*this),
+        m_terms(terms)
     {}   
 
-    void sls_eval::init_eval(expr_ref_vector const& es, std::function<bool(expr*, unsigned)> const& eval) {
-        sort_assertions(es);
-        for (expr* e : m_todo) {
+    void sls_eval::init_eval(std::function<bool(expr*, unsigned)> const& eval) {
+        auto const& terms = sorted_terms();
+        for (expr* e : terms) {
             if (!is_app(e))
                 continue;
             app* a = to_app(e);
@@ -49,33 +50,6 @@ namespace bv {
                 TRACE("sls", tout << "Unhandled expression " << mk_pp(e, m) << "\n");
             }
         }
-        m_todo.reset();
-    }
-
-    /**
-    * Sort all sub-expressions by depth, smallest first.
-    */
-    ptr_vector<expr>& sls_eval::sort_assertions(expr_ref_vector const& es) {
-        expr_fast_mark1 mark;
-        for (expr* e : es) {
-            if (!mark.is_marked(e)) {
-                mark.mark(e);
-                m_todo.push_back(e);
-            }
-        }
-        for (unsigned i = 0; i < m_todo.size(); ++i) {
-            auto e = m_todo[i];
-            if (!is_app(e))
-                continue;
-            for (expr* arg : *to_app(e)) {
-                if (!mark.is_marked(arg)) {
-                    mark.mark(arg);
-                    m_todo.push_back(arg);
-                }
-            }
-        }
-        std::stable_sort(m_todo.begin(), m_todo.end(), [&](expr* a, expr* b) { return get_depth(a) < get_depth(b); });
-        return m_todo;
     }
 
     bool sls_eval::add_bit_vector(app* e) {
@@ -1718,7 +1692,7 @@ namespace bv {
     }
 
     std::ostream& sls_eval::display(std::ostream& out, expr_ref_vector const& es) {
-        auto& terms = sort_assertions(es);
+        auto& terms = sorted_terms();
         for (expr* e : terms) {
             out << e->get_id() << ": " << mk_bounded_pp(e, m, 1) << " ";
             if (is_fixed0(e))
@@ -1729,7 +1703,6 @@ namespace bv {
                 out << (bval0(e) ? "T" : "F");
             out << "\n";
         }
-        terms.reset();
         return out;
     }
 }

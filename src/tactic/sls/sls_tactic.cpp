@@ -169,9 +169,8 @@ public:
         std::function<bool(expr*, unsigned)> false_eval = [&](expr* e, unsigned idx) {
             return false;
         };
-        m_sls->init_eval(false_eval);
 
-        lbool res = m_sls->operator()();
+        lbool res = m_sls->operator()(false_eval, 0, nullptr);
         auto const& stats = m_sls->get_stats();
         report_tactic_progress("Number of flips:", stats.m_moves);
         IF_VERBOSE(20, verbose_stream() << res << "\n");

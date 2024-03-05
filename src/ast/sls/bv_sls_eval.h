@@ -19,11 +19,11 @@ Author:
 #include "ast/ast.h"
 #include "ast/sls/sls_valuation.h"
 #include "ast/sls/bv_sls_fixed.h"
+#include "ast/sls/bv_sls_terms.h"
 #include "ast/bv_decl_plugin.h"
 
 namespace bv {
 
-    class sls_fixed;
 
     class sls_eval {
         struct config {
@@ -35,8 +35,9 @@ namespace bv {
         ast_manager&        m;
         bv_util             bv;
         sls_fixed           m_fix;
+        sls_terms&          m_terms;
         mutable mpn_manager mpn;
-        ptr_vector<expr>    m_todo;
+        ptr_vector<expr>    m_todo, m_sorted;
         random_gen          m_rand;
         config              m_config;
 
@@ -125,13 +126,13 @@ namespace bv {
         bvect const& eval_value(app* e) const { return wval(e).eval; }
 
     public:
-        sls_eval(ast_manager& m);
+        sls_eval(ast_manager& m, sls_terms& terms);
 
-        void init_eval(expr_ref_vector const& es, std::function<bool(expr*, unsigned)> const& eval);
+        void init_eval(std::function<bool(expr*, unsigned)> const& eval);
 
-        void tighten_range(expr_ref_vector const& es) { m_fix.init(es); }
+        void tighten_range() { m_fix.init(m_terms.assertions()); }
 
-        ptr_vector<expr>& sort_assertions(expr_ref_vector const& es);
+        ptr_vector<expr> const& sorted_terms() { return m_terms.sorted_terms(); }
 
         /**
          * Retrieve evaluation based on cache.
@@ -156,10 +157,7 @@ namespace bv {
         /**
          * Override evaluaton.
          */
-
-        void set(expr* e, bool b) {
-            m_eval[e->get_id()] = b;
-        }        
+        void set(expr* e, bool b) { m_eval[e->get_id()] = b; }        
 
         /*
         * Try to invert value of child to repair value assignment of parent.

@@ -25,8 +25,8 @@ namespace bv {
     {}
 
     void sls_fixed::init(expr_ref_vector const& es) {
-        ev.sort_assertions(es);
-        for (expr* e : ev.m_todo) {
+        auto const& terms = ev.sorted_terms();
+        for (expr* e : terms) {
             if (!is_app(e))
                 continue;
             app* a = to_app(e);
@@ -38,7 +38,6 @@ namespace bv {
             else
                 ;
         }
-        ev.m_todo.reset();
         init_ranges(es);
     }
 

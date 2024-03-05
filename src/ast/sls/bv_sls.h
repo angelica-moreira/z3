@@ -31,7 +31,6 @@ Author:
 
 namespace bv {
 
-
     class sls {
 
         struct config {
@@ -44,13 +43,16 @@ namespace bv {
         sls_terms           m_terms;
         sls_eval            m_eval;
         sls_stats           m_stats;
-        indexed_uint_set    m_repair_up, m_repair_roots;
+        indexed_uint_set    m_repair_up, m_repair_roots, m_assertion_set;
         unsigned            m_repair_down = UINT_MAX;
-        ptr_vector<expr>    m_todo;
+        ptr_vector<expr>    m_todo;        
         random_gen          m_rand;
         config              m_config;
+
         
         std::pair<bool, app*> next_to_repair();
+
+        bool is_assertion(expr* e) const { return m_assertion_set.contains(e->get_id()); }
         
         bool eval_is_correct(app* e);
         bool re_eval_is_correct(app* e);
@@ -60,13 +62,21 @@ namespace bv {
         void set_repair_down(expr* e) { m_repair_down = e->get_id(); }
 
         lbool search();
-        void reinit_eval();
-        void init_repair();
+        void reinit_eval(unsigned n, expr* const* asms);
+        void init_repair(unsigned n, expr* const* asms);
         void trace();
         void trace_repair(bool down, expr* e);
 
+        /**
+         * Invoke init_eval to initialize, or re-initialize, values of
+         * uninterpreted constants.
+         */
+        void init_eval(std::function<bool(expr*, unsigned)>& eval, unsigned n, expr* const* asms);
+
     public:
         sls(ast_manager& m);
+
+        expr* register_expr(expr* e) { return m_terms.register_expr(e); }
                 
         /**
         * Add constraints
@@ -80,15 +90,9 @@ namespace bv {
         void init();
 
         /**
-        * Invoke init_eval to initialize, or re-initialize, values of
-        * uninterpreted constants.
-        */
-        void init_eval(std::function<bool(expr*, unsigned)>& eval);
-
-        /**
         * Run (bounded) local search to find feasible assignments.
         */
-        lbool operator()();
+        lbool operator()(std::function<bool(expr*, unsigned)>& eval, unsigned n, expr* const* assertions);
 
         void updt_params(params_ref const& p);
         void collect_statistics(statistics & st) const { m_stats.collect_statistics(st); }

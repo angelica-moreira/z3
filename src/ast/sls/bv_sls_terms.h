@@ -31,8 +31,8 @@ namespace bv {
     class sls_terms {
         ast_manager&        m;
         bv_util             bv;
-        ptr_vector<expr>    m_todo, m_args;
-        expr_ref_vector     m_assertions, m_pinned, m_translated;
+        ptr_vector<expr>    m_todo, m_args, m_sorted;
+        expr_ref_vector     m_assertions, m_roots, m_pinned, m_translated;
         app_ref_vector      m_terms;
         vector<ptr_vector<expr>> m_parents;
         tracked_uint_set    m_assertion_set;
@@ -52,10 +52,14 @@ namespace bv {
         */
         void assert_expr(expr* e);
 
+        expr* register_expr(expr* e);
+
         /**
          * Initialize structures: assertions, parents, terms
          */        
         void init();
+
+        ptr_vector<expr> const& sorted_terms();
 
         /**
          * Accessors.
@@ -64,6 +68,8 @@ namespace bv {
         ptr_vector<expr> const& parents(expr* e) const { return m_parents[e->get_id()]; }
 
         expr_ref_vector const& assertions() const { return m_assertions; }
+
+        expr_ref_vector const& roots() const { return m_roots; }
 
         app* term(unsigned id) const { return m_terms.get(id); }
 

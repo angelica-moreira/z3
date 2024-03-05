@@ -27,6 +27,7 @@ namespace bv {
         m(m), 
         bv(m),
         m_assertions(m),
+        m_roots(m),
         m_pinned(m),
         m_translated(m), 
         m_terms(m){}
@@ -34,6 +35,43 @@ namespace bv {
 
     void sls_terms::assert_expr(expr* e) {
         m_assertions.push_back(ensure_binary(e));
+        m_roots.push_back(m_assertions.back());
+        m_sorted.reset();
+    }
+
+    expr* sls_terms::register_expr(expr* e) {
+        e = ensure_binary(e);
+        m_roots.push_back(e);        
+        m_sorted.reset();
+        return e;
+    }
+
+    /**
+* Sort all sub-expressions by depth, smallest first.
+*/
+    ptr_vector<expr> const& sls_terms::sorted_terms() {
+        if (!m_sorted.empty())
+            return m_sorted;
+        expr_fast_mark1 mark;
+        for (expr* e : roots()) {
+            if (!mark.is_marked(e)) {
+                mark.mark(e);
+                m_sorted.push_back(e);
+            }
+        }
+        for (unsigned i = 0; i < m_sorted.size(); ++i) {
+            auto e = m_sorted[i];
+            if (!is_app(e))
+                continue;
+            for (expr* arg : *to_app(e)) {
+                if (!mark.is_marked(arg)) {
+                    mark.mark(arg);
+                    m_sorted.push_back(arg);
+                }
+            }
+        }
+        std::stable_sort(m_sorted.begin(), m_sorted.end(), [&](expr* a, expr* b) { return get_depth(a) < get_depth(b); });
+        return m_sorted;
     }
 
     expr* sls_terms::ensure_binary(expr* e) {
