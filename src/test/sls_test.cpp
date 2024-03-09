@@ -25,12 +25,13 @@ namespace bv {
             std::function<bool(expr*, unsigned)> value = [](expr*, unsigned) {
                 return false;
             };
-            expr_ref_vector es(m);
             bv_util bv(m);
-            es.push_back(e);
-            sls_eval ev(m);
-            ev.init_eval(es, value);
-            ev.tighten_range(es);
+            sls_terms terms(m);
+            terms.assert_expr(e);
+            sls_eval ev(m, terms);
+            
+            ev.init_eval(value);
+            ev.tighten_range();
             th_rewriter rw(m);
             expr_ref r(e, m);
             rw(r);
@@ -142,9 +143,13 @@ namespace bv {
             rw(r);
             es.push_back(m.is_false(r) ? m.mk_not(e1) : e1);
             es.push_back(m.is_false(r) ? m.mk_not(e2) : e2);
-            sls_eval ev(m);
-            ev.init_eval(es, value);
-            ev.tighten_range(es);
+            sls_terms terms(m);
+            for (expr* e : es)
+                terms.assert_expr(e);
+
+            sls_eval ev(m, terms);
+            ev.init_eval( value);
+            ev.tighten_range();
 
             if (m.is_bool(e1)) {
                 SASSERT(m.is_true(r) || m.is_false(r));
