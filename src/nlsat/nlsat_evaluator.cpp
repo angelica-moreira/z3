@@ -45,7 +45,7 @@ namespace nlsat {
             if (m_am.lt(r, v)) {
 			    return true;
 			}
-            TRACE("algebraic", tout << "r is not greater than v" << std::endl;);
+            TRACE("algebraic", tout << "r is not less than v" << std::endl;);
 
             return false;
         }
@@ -63,6 +63,7 @@ namespace nlsat {
             if (m_am.lt(v, r)){
                 return true;
             }
+            TRACE("algebraic", tout << "v is not less than r" << std::endl;);
 
             return false;
         }
