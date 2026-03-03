@@ -1,0 +1,11 @@
+name: z3-memory-safety
+version: 0.1.0
+library: false
+suites: .
+default-suite:
+  queries: .
+  exclude:
+    id: z3/memory-safety/suite
+dependencies:
+  codeql/cpp-all: "*"
+extractor: cpp
