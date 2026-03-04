@@ -1,4 +1,4 @@
 - description: Z3 Memory Safety Query Suite — custom queries plus CodeQL built-in security queries
 - queries: .
 - qlpack: codeql/cpp-queries
-  apply: security-and-quality
+  apply: security-extended

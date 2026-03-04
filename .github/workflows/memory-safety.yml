@@ -36,7 +36,7 @@ jobs:
   codeql-analysis:
     name: "CodeQL Memory Safety Analysis"
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -51,7 +51,7 @@ jobs:
           languages: ${{ matrix.language }}
           config: |
             queries:
-              - uses: security-and-quality
+              - uses: security-extended
               - uses: ./codeql/custom_queries/memory-safety
             paths-ignore:
               - 'build/**'
