@@ -7,11 +7,6 @@ on:
       - 'src/**'
       - 'codeql/**'
       - '.github/workflows/memory-safety.yml'
-  pull_request:
-    branches: ["**"]
-    paths:
-      - 'src/**'
-      - 'codeql/**'
   workflow_dispatch:
     inputs:
       full_scan:
