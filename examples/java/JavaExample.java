@@ -2277,6 +2277,30 @@ class JavaExample
 	
     }    
 
+    @SuppressWarnings("unchecked")
+    void absExample(Context ctx) throws TestFailedException
+    {
+        System.out.println("AbsExample");
+        Log.append("AbsExample");
+
+        IntExpr x = ctx.mkIntConst("x");
+        Solver s = ctx.mkSolver();
+        s.add(ctx.mkEq(x, ctx.mkAbs(ctx.mkInt(-5))));
+        s.check();
+        int result = ((IntNum) s.getModel().eval(x, true)).getInt();
+        if (result != 5)
+            throw new TestFailedException();
+
+        s = ctx.mkSolver();
+        s.add(ctx.mkEq(x, ctx.mkAbs(ctx.mkInt(3))));
+        s.check();
+        result = ((IntNum) s.getModel().eval(x, true)).getInt();
+        if (result != 3)
+            throw new TestFailedException();
+
+        System.out.println("AbsExample passed.");
+    }
+
     public static void main(String[] args)
     {
         JavaExample p = new JavaExample();
@@ -2328,6 +2352,7 @@ class JavaExample
                 p.finiteDomainExample(ctx);
                 p.floatingPointExample1(ctx);
                 // core dumps: p.floatingPointExample2(ctx);
+                p.absExample(ctx);
             }
 
             { // These examples need proof generation turned on.
