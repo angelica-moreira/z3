@@ -53,6 +53,28 @@ public class IntNum extends IntExpr
     }
 
     /**
+     * Retrieve the unsigned int value.
+     **/
+    public int getUint()
+    {
+        Native.IntPtr res = new Native.IntPtr();
+        if (!Native.getNumeralUint(getContext().nCtx(), getNativeObject(), res))
+            throw new Z3Exception("Numeral is not a uint");
+        return res.value;
+    }
+
+    /**
+     * Retrieve the unsigned 64-bit int value.
+     **/
+    public long getUint64()
+    {
+        Native.LongPtr res = new Native.LongPtr();
+        if (!Native.getNumeralUint64(getContext().nCtx(), getNativeObject(), res))
+            throw new Z3Exception("Numeral is not a uint64");
+        return res.value;
+    }
+
+    /**
      * Retrieve the BigInteger value.
      **/
     public BigInteger getBigInteger()
