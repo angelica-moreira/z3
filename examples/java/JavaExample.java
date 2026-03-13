@@ -2334,6 +2334,22 @@ class JavaExample
         System.out.println("DividesExample passed.");
     }
 
+    void numeralDoubleExample(Context ctx) throws TestFailedException
+    {
+        System.out.println("NumeralDoubleExample");
+        Log.append("NumeralDoubleExample");
+
+        IntNum n42 = ctx.mkInt(42);
+        if (n42.getNumeralDouble() != 42.0)
+            throw new TestFailedException();
+
+        RatNum half = ctx.mkReal(1, 2);
+        if (Math.abs(half.getNumeralDouble() - 0.5) > 1e-10)
+            throw new TestFailedException();
+
+        System.out.println("NumeralDoubleExample passed.");
+    }
+
     public static void main(String[] args)
     {
         JavaExample p = new JavaExample();
@@ -2387,6 +2403,7 @@ class JavaExample
                 // core dumps: p.floatingPointExample2(ctx);
                 p.absExample(ctx);
                 p.dividesExample(ctx);
+                p.numeralDoubleExample(ctx);
             }
 
             { // These examples need proof generation turned on.
