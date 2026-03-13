@@ -1081,6 +1081,19 @@ public class Context implements AutoCloseable {
     }
 
     /**
+     * Create a divisibility predicate.
+     * The result is true when {@code t1} divides {@code t2}.
+     * Both arguments must have integer sort.
+     **/
+    public BoolExpr mkDivides(Expr<IntSort> t1, Expr<IntSort> t2)
+    {
+        checkContextMatch(t1);
+        checkContextMatch(t2);
+        return new BoolExpr(this, Native.mkDivides(nCtx(),
+                t1.getNativeObject(), t2.getNativeObject()));
+    }
+
+    /**
      * Create an expression representing {@code t1 &lt; t2}
      **/
     public BoolExpr mkLt(Expr<? extends ArithSort> t1, Expr<? extends ArithSort> t2)
