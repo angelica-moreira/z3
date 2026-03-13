@@ -2350,6 +2350,22 @@ class JavaExample
         System.out.println("NumeralDoubleExample passed.");
     }
 
+    void unsignedNumeralExample(Context ctx) throws TestFailedException
+    {
+        System.out.println("UnsignedNumeralExample");
+        Log.append("UnsignedNumeralExample");
+
+        IntNum n100 = ctx.mkInt(100);
+        if (n100.getUint() != 100)
+            throw new TestFailedException();
+
+        IntNum big = ctx.mkInt(3000000000L);
+        if (big.getUint64() != 3000000000L)
+            throw new TestFailedException();
+
+        System.out.println("UnsignedNumeralExample passed.");
+    }
+
     public static void main(String[] args)
     {
         JavaExample p = new JavaExample();
@@ -2404,6 +2420,7 @@ class JavaExample
                 p.absExample(ctx);
                 p.dividesExample(ctx);
                 p.numeralDoubleExample(ctx);
+                p.unsignedNumeralExample(ctx);
             }
 
             { // These examples need proof generation turned on.
