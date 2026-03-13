@@ -1071,6 +1071,16 @@ public class Context implements AutoCloseable {
     }
 
     /**
+     * Create an expression representing the absolute value of {@code t}.
+     * The argument must have integer sort.
+     **/
+    public IntExpr mkAbs(Expr<IntSort> t)
+    {
+        checkContextMatch(t);
+        return new IntExpr(this, Native.mkAbs(nCtx(), t.getNativeObject()));
+    }
+
+    /**
      * Create an expression representing {@code t1 &lt; t2}
      **/
     public BoolExpr mkLt(Expr<? extends ArithSort> t1, Expr<? extends ArithSort> t2)
