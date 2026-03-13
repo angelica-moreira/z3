@@ -2301,6 +2301,39 @@ class JavaExample
         System.out.println("AbsExample passed.");
     }
 
+    @SuppressWarnings("unchecked")
+    void dividesExample(Context ctx) throws TestFailedException
+    {
+        System.out.println("DividesExample");
+        Log.append("DividesExample");
+
+        // 3 divides 9
+        Solver s = ctx.mkSolver();
+        s.add(ctx.mkDivides(ctx.mkInt(3), ctx.mkInt(9)));
+        if (s.check() != Status.SATISFIABLE)
+            throw new TestFailedException();
+
+        // 3 does not divide 7
+        s = ctx.mkSolver();
+        s.add(ctx.mkDivides(ctx.mkInt(3), ctx.mkInt(7)));
+        if (s.check() != Status.UNSATISFIABLE)
+            throw new TestFailedException();
+
+        // symbolic: find y such that 5 | y and 0 < y < 10
+        IntExpr y = ctx.mkIntConst("y");
+        s = ctx.mkSolver();
+        s.add(ctx.mkDivides(ctx.mkInt(5), y));
+        s.add(ctx.mkGt(y, ctx.mkInt(0)));
+        s.add(ctx.mkLt(y, ctx.mkInt(10)));
+        if (s.check() != Status.SATISFIABLE)
+            throw new TestFailedException();
+        int yVal = ((IntNum) s.getModel().eval(y, true)).getInt();
+        if (yVal != 5)
+            throw new TestFailedException();
+
+        System.out.println("DividesExample passed.");
+    }
+
     public static void main(String[] args)
     {
         JavaExample p = new JavaExample();
@@ -2353,6 +2386,7 @@ class JavaExample
                 p.floatingPointExample1(ctx);
                 // core dumps: p.floatingPointExample2(ctx);
                 p.absExample(ctx);
+                p.dividesExample(ctx);
             }
 
             { // These examples need proof generation turned on.
