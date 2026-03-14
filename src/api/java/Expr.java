@@ -247,6 +247,8 @@ public class Expr<R extends Sort> extends AST
     /**
      * Return the numeral value as a double.
      * The expression must be a numeral or an algebraic number.
+     *
+     * @throws Z3Exception on error
      **/
     public double getNumeralDouble()
     {
