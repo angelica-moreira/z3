@@ -53,8 +53,23 @@ public class IntNum extends IntExpr
     }
 
     /**
-     * Retrieve the unsigned int value.
-     **/
+     * Retrieve the unsigned 32-bit value.
+     * <p>
+     * The value is returned as a Java {@code int} containing the raw 32-bit
+     * two's-complement bit pattern of the underlying unsigned integer. For
+     * values greater than {@code 0x7FFFFFFF} ({@code 2^31 - 1}), the returned
+     * {@code int} will be negative when interpreted as a signed value.
+     * <p>
+     * To interpret the result as an unsigned 32-bit value, use the standard
+     * Java unsigned helpers, for example:
+     * <pre>
+     *   int v = intNum.getUint();
+     *   long unsignedNumeric = Integer.toUnsignedLong(v);
+     *   String unsignedString = Integer.toUnsignedString(v);
+     * </pre>
+     *
+     * @return the underlying 32-bit unsigned value encoded in a Java {@code int}
+     */
     public int getUint()
     {
         Native.IntPtr res = new Native.IntPtr();
@@ -64,8 +79,25 @@ public class IntNum extends IntExpr
     }
 
     /**
-     * Retrieve the unsigned 64-bit int value.
-     **/
+     * Retrieve the unsigned 64-bit value.
+     * <p>
+     * The value is returned as a Java {@code long} containing the raw 64-bit
+     * two's-complement bit pattern of the underlying unsigned integer. For
+     * values greater than {@code 0x7FFFFFFFFFFFFFFFL} ({@code 2^63 - 1}),
+     * the returned {@code long} will be negative when interpreted as a signed
+     * value.
+     * <p>
+     * To obtain an unsigned representation, you can use:
+     * <pre>
+     *   long v = intNum.getUint64();
+     *   String unsignedString = Long.toUnsignedString(v);
+     * </pre>
+     * or use {@link #getBigInteger()} to retrieve the value as a
+     * {@link java.math.BigInteger} if you need an explicit arbitrary-precision
+     * numeric type.
+     *
+     * @return the underlying 64-bit unsigned value encoded in a Java {@code long}
+     */
     public long getUint64()
     {
         Native.LongPtr res = new Native.LongPtr();
