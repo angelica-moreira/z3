@@ -148,8 +148,7 @@ namespace sls {
                 a.find_linear_moves(*ineq, x, nb);
             else if (a.is_quadratic(x, nl, na, nb))
                 a.find_quadratic_moves(*ineq, x, na, nb, ineq->m_args_value);
-            else
-                ;
+            else {}
         }
     }
 

@@ -73,6 +73,8 @@ static_assert(sizeof(int64_t) == 8, "64 bits");
 #elif defined(__has_cpp_attribute)
 # if __has_cpp_attribute(clang::fallthrough)
 #  define Z3_fallthrough [[clang::fallthrough]]
+# elif __has_cpp_attribute(fallthrough)
+#  define Z3_fallthrough [[fallthrough]]
 # else
 #  define Z3_fallthrough
 # endif
