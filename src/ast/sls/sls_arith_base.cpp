@@ -2043,8 +2043,7 @@ namespace sls {
                 find_linear_moves(*ineq, x, b);
             else if (is_quadratic(x, nl, a, b))
                 find_quadratic_moves(*ineq, x, a, b, ineq->m_args_value);
-            else
-                ;
+            else {}
         }        
         return apply_update();
     }

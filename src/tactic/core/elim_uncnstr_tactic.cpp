@@ -756,6 +756,7 @@ class elim_uncnstr_tactic : public tactic {
                     }
                     return r;
                 }
+                Z3_fallthrough;
             default:
                 return nullptr;
             }

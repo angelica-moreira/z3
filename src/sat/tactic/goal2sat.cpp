@@ -395,6 +395,7 @@ struct goal2sat::imp : public sat::sat_internalizer {
             strm << mk_ismt2_pp(t, m);
             throw_op_not_handled(strm.str());
         }
+        Z3_fallthrough;
         default:
             convert_atom(t, root, sign);
             return true;
